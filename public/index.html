@@ -1,42 +1,245 @@
 <html>
   <head>
+    <!-- Add favicon -->
+    <link rel="icon" type="image/png" href="/img/favicon.png" />
+    <link rel="shortcut icon" type="image/png" href="/img/favicon.png" />
+    <link rel="apple-touch-icon" href="/img/favicon.png" />
+
+    <!-- Add meta tags for social sharing -->
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Realtime Multiplayer Shooting Game</title>
+    <meta
+      name="description"
+      content="An exciting multiplayer shooting game with real-time interactions"
+    />
+    <meta name="author" content="AlaminXpro" />
+
+    <!-- Open Graph Meta Tags -->
+    <meta property="og:title" content="Realtime Multiplayer Shooting Game" />
+    <meta
+      property="og:description"
+      content="Join this exciting multiplayer shooting game with real-time player interactions and competitive gameplay!"
+    />
+    <meta property="og:image" content="/img/thumbnail.png" />
+    <meta property="og:url" content="" />
+    <meta property="og:type" content="website" />
+    <meta
+      property="og:site_name"
+      content="Realtime Multiplayer Shooting Game"
+    />
+
+    <!-- Twitter Card Meta Tags -->
+    <meta name="twitter:card" content="summary_large_image" />
+    <meta name="twitter:title" content="Realtime Multiplayer Shooting Game" />
+    <meta
+      name="twitter:description"
+      content="Join this exciting multiplayer shooting game with real-time player interactions and competitive gameplay!"
+    />
+    <meta name="twitter:image" content="/img/thumbnail.jpg" />
+
+    <!-- Developer Info -->
+    <meta name="developer" content="AlaminXpro" />
+    <link rel="author" href="https://www.linkedin.com/in/alaminxpro/" />
+
     <style>
       body {
         -webkit-font-smoothing: antialiased;
         -moz-osx-font-smoothing: grayscale;
         text-rendering: optimizeLegibility;
         margin: 0;
-        background: #94a3b8;
+        overflow: hidden;
+        width: 100vw;
+        height: 100vh;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+      }
+
+      #scene-container {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100vw;
+        height: 100vh;
+        z-index: 1;
+      }
+
+      #game-container {
+        position: relative;
+        width: 1024px;
+        height: 576px;
+        z-index: 2;
+        /* transform-origin: top left; */
+      }
+
+      #gameCanvas {
+        position: absolute;
+        width: 1024px;
+        height: 576px;
+        background: transparent;
+        object-fit: contain;
       }
 
       input::placeholder {
         color: #94a3b8;
       }
 
-      canvas {
-        width: 1024px;
-        height: 576px;
-        background-image: url('/img/webb-dark.png');
+      #leaderboard {
+        display: none; /* Initially hide the leaderboard */
+        position: absolute;
+        z-index: 3;
+        color: white;
+        padding: 8px;
+        font-family: sans-serif;
+        font-size: 14px;
+        user-select: none;
+        background: rgba(0, 0, 0, 0.5);
+      }
+
+      .credit-section {
+        position: fixed;
+        bottom: 10px;
+        text-align: center;
+        width: 100%;
+        z-index: 4; /* Ensure it is above other elements */
+      }
+
+      .credit-section img {
+        width: 20%; /* Adjust the size as needed */
+        height: 20%;
+      }
+
+      .button-container {
+        display: flex;
+        justify-content: center;
+        gap: 10px;
+        margin-top: 8px;
+      }
+
+      .button-container button {
+        padding: 8px 20px;
+        border-radius: 100px;
+        border: none;
+        background-image: linear-gradient(
+          to right,
+          rgb(6, 182, 212),
+          rgb(59, 130, 246)
+        );
+        color: white;
+        cursor: pointer;
+      }
+
+      .social-share {
+        display: none;
+        margin-top: 15px;
+        text-align: center;
+      }
+
+      .social-share a {
+        display: inline-block;
+        margin: 0 10px;
+        text-decoration: none;
+        color: white;
+        font-size: 24px;
+        transition: transform 0.2s;
+      }
+
+      .social-share a:hover {
+        transform: scale(1.2);
+      }
+
+      .fa-facebook {
+        color: #1877f2;
+      }
+      .fa-twitter {
+        color: #1da1f2;
+      }
+      .fa-linkedin {
+        color: #0077b5;
+      }
+
+      .instructions {
+        background: rgba(0, 0, 0, 0.7);
+        padding: 20px;
+        border-radius: 15px;
+        color: white;
+        margin-bottom: 20px;
+        font-family: sans-serif;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      .instructions h3 {
+        margin: 0 0 15px 0;
+        color: #60a5fa;
+        font-size: 18px;
+        text-align: center;
+      }
+
+      .controls-grid {
+        display: grid;
+        grid-template-columns: auto auto;
+        gap: 10px;
+        margin-bottom: 15px;
+      }
+
+      .control-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .key {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 4px 8px;
+        border-radius: 4px;
+        font-family: monospace;
+        color: #60a5fa;
+      }
+
+      .input-container {
+        display: flex;
+        justify-content: center;
+        width: 100%;
+        margin-bottom: 8px;
+      }
+
+      #usernameInput {
+        width: 100%;
+        max-width: 300px;
+        padding: 12px;
+        border-radius: 20px;
+        border: none;
+        background: #475569;
+        color: #cbd5e1;
+        text-align: center;
       }
     </style>
+    <script type="importmap">
+      {
+        "imports": {
+          "three": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.module.js",
+          "three/webgpu": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.webgpu.js",
+          "three/tsl": "https://cdn.jsdelivr.net/npm/three@0.172.0/build/three.tsl.js",
+          "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.172.0/examples/jsm/"
+        }
+      }
+    </script>
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"
+    />
   </head>
-  <body style="display: flex; align-items: center; justify-content: center">
-    <div>
-      <div
-        style="
-          position: absolute;
-          color: white;
-          padding: 8px;
-          font-family: sans-serif;
-          font-size: 14px;
-          user-select: none;
-          background: rgba(0, 0, 0, 0.5);
-        "
-      >
+  <body>
+    <div id="game-container">
+      <!-- Leaderboard -->
+      <div id="leaderboard">
         <div style="margin-bottom: 8px">Leaderboard</div>
         <div id="playerLabels"></div>
       </div>
-      <canvas></canvas>
+
+      <canvas id="gameCanvas"></canvas>
 
       <!-- username input -->
       <div
@@ -52,42 +255,75 @@
         "
       >
         <form id="usernameForm">
-          <div>
+          <div class="instructions">
+            <h3>Use Keyboard To Play</h3>
+            <div class="controls-grid">
+              <div class="control-item">
+                <span class="key">WASD</span>
+                <span>Move character</span>
+              </div>
+              <div class="control-item">
+                <span class="key">Mouse Click</span>
+                <span>Shoot</span>
+              </div>
+              <div class="control-item">
+                <span class="key">WASD + RF + QE</span>
+                <span>Fly camera</span>
+              </div>
+              <div class="control-item">
+                <span class="key">Mouse</span>
+                <span>Look around</span>
+              </div>
+            </div>
+          </div>
+          <div class="input-container">
             <input
               id="usernameInput"
               type="text"
               placeholder="Username"
-              style="
-                padding: 12px;
-                border-radius: 20px;
-                border: none;
-                background: #475569;
-                color: #cbd5e1;
-              "
             />
           </div>
-          <div style="text-align: center; margin-top: 8px">
-            <button
-              style="
-                padding: 8px 20px;
-                border-radius: 100px;
-                border: none;
-                background-image: linear-gradient(
-                  to right,
-                  rgb(6, 182, 212),
-                  rgb(59, 130, 246)
-                );
-                color: white;
-                cursor: pointer;
-              "
+          <div class="button-container">
+            <button>Start!</button>
+            <button id="shareButton" type="button">Share</button>
+          </div>
+          <div class="social-share" id="socialShare" style="display: none">
+            <a
+              href="https://www.facebook.com/sharer/sharer.php?u=YOUR_URL"
+              target="_blank"
             >
-              Start!
-            </button>
+              <i class="fab fa-facebook"></i>
+            </a>
+            <a
+              href="https://twitter.com/intent/tweet?url=YOUR_URL"
+              target="_blank"
+            >
+              <i class="fab fa-twitter"></i>
+            </a>
+            <a
+              href="https://www.linkedin.com/sharing/share-offsite/?url=YOUR_URL"
+              target="_blank"
+            >
+              <i class="fab fa-linkedin"></i>
+            </a>
           </div>
         </form>
       </div>
       <!-- username input end -->
     </div>
+    <!-- Credit section -->
+    <div class="credit-section">
+      <a
+        href="https://www.linkedin.com/in/alaminxpro/"
+        target="_blank"
+        style="text-decoration: none"
+      >
+        <img src="/img/logo.gif" alt="Game Programmer AlaminXpro" />
+      </a>
+    </div>
+    <div id="scene-container"></div>
+
+    <script type="module" src="./js/three-background.js"></script>
 
     <script
       src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.10.2/gsap.min.js"

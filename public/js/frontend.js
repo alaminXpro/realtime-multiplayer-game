@@ -1,4 +1,4 @@
-const canvas = document.querySelector('canvas')
+const canvas = document.querySelector('#gameCanvas')
 const c = canvas.getContext('2d')
 
 const socket = io()
@@ -7,10 +7,11 @@ const scoreEl = document.querySelector('#scoreEl')
 
 const devicePixelRatio = window.devicePixelRatio || 1
 
-canvas.width = 1024 * devicePixelRatio
-canvas.height = 576 * devicePixelRatio
+canvas.width = 1024
+canvas.height = 576
 
-c.scale(devicePixelRatio, devicePixelRatio)
+// Remove the devicePixelRatio scaling since we're using fixed dimensions
+// c.scale(devicePixelRatio, devicePixelRatio)
 
 const x = canvas.width / 2
 const y = canvas.height / 2
@@ -19,6 +20,9 @@ const frontEndPlayers = {}
 const frontEndProjectiles = {}
 
 const ripples = []
+
+// Remove background color setting since we want transparency
+canvas.style.backgroundColor = 'transparent'
 
 socket.on('updateProjectiles', (backEndProjectiles) => {
   for (const id in backEndProjectiles) {
@@ -55,7 +59,8 @@ socket.on('updatePlayers', (backEndPlayers) => {
         y: backEndPlayer.y,
         radius: 10,
         color: backEndPlayer.color,
-        username: backEndPlayer.username
+        username: backEndPlayer.username,
+        context: c // Add this line to pass the canvas context
       })
 
       document.querySelector(
@@ -264,18 +269,67 @@ window.addEventListener('keyup', (event) => {
 
 canvas.addEventListener('click', (event) => {
   const rect = canvas.getBoundingClientRect()
-  const x = (event.clientX - rect.left) * devicePixelRatio
-  const y = (event.clientY - rect.top) * devicePixelRatio
+  const gameContainer = document.querySelector('#game-container')
+  const containerRect = gameContainer.getBoundingClientRect()
+
+  // Calculate the scale of the container
+  const scaleX = containerRect.width / canvas.width
+  const scaleY = containerRect.height / canvas.height
+
+  // Get click position relative to the canvas
+  const x = (event.clientX - rect.left) / scaleX
+  const y = (event.clientY - rect.top) / scaleY
+
   ripples.push(new Ripple(x, y))
+
+  if (frontEndPlayers[socket.id]) {
+    const angle = Math.atan2(
+      y - frontEndPlayers[socket.id].y,
+      x - frontEndPlayers[socket.id].x
+    )
+
+    socket.emit('shoot', {
+      x: frontEndPlayers[socket.id].x,
+      y: frontEndPlayers[socket.id].y,
+      angle
+    })
+  }
 })
 
 document.querySelector('#usernameForm').addEventListener('submit', (event) => {
   event.preventDefault()
+  const username = document.querySelector('#usernameInput').value
+  if (username.trim() === '') {
+    alert('Username is required to enter the game.')
+    return
+  }
   document.querySelector('#usernameForm').style.display = 'none'
+  document.querySelector('#leaderboard').style.display = 'block' // Show leaderboard
   socket.emit('initGame', {
     width: canvas.width,
     height: canvas.height,
     devicePixelRatio,
-    username: document.querySelector('#usernameInput').value
+    username
   })
+})
+
+// Share button functionality
+document.getElementById('shareButton').addEventListener('click', () => {
+  const socialShare = document.getElementById('socialShare')
+  const isHidden =
+    socialShare.style.display === 'none' || !socialShare.style.display
+  socialShare.style.display = isHidden ? 'block' : 'none'
+  document.getElementById('shareButton').innerText = isHidden ? 'Hide' : 'Share'
+})
+
+// Add this script to dynamically set share URLs
+document.addEventListener('DOMContentLoaded', () => {
+  const currentUrl = encodeURIComponent(window.location.href)
+  const socialLinks = document.querySelectorAll('.social-share a')
+  socialLinks.forEach((link) => {
+    link.href = link.href.replace('YOUR_URL', currentUrl)
+  })
+  document
+    .querySelector('meta[property="og:url"]')
+    .setAttribute('content', window.location.href)
 })
