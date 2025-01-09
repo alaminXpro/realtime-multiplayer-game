@@ -7,7 +7,7 @@
 
     <!-- Add meta tags for social sharing -->
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Realtime Multiplayer Shooting Game</title>
     <meta
       name="description"
@@ -54,6 +54,7 @@
         display: flex;
         justify-content: center;
         align-items: center;
+        background-color: #1a1a1a;
       }
 
       #scene-container {
@@ -70,7 +71,9 @@
         width: 1024px;
         height: 576px;
         z-index: 2;
-        /* transform-origin: top left; */
+        transform-origin: center;
+        max-width: 100vw;
+        max-height: 100vh;
       }
 
       #gameCanvas {
@@ -215,6 +218,62 @@
         color: #cbd5e1;
         text-align: center;
       }
+
+      /* Add these new styles */
+      #compatibility-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: #1a1a1a;
+        z-index: 9999;
+        justify-content: center;
+        align-items: center;
+        padding: 20px;
+        box-sizing: border-box;
+        font-family: sans-serif;
+      }
+
+      .compatibility-content {
+        background: rgba(255, 255, 255, 0.1);
+        padding: 25px;
+        border-radius: 15px;
+        text-align: center;
+        max-width: 90%;
+        margin: 0 auto;
+        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 255, 255, 0.1);
+      }
+
+      #compatibility-overlay h2 {
+        color: #60a5fa;
+        margin: 0 0 15px 0;
+        font-size: clamp(1.5rem, 5vw, 2rem);
+        line-height: 1.2;
+      }
+
+      #compatibility-overlay p {
+        color: #fff;
+        font-size: clamp(0.9rem, 4vw, 1.1rem);
+        line-height: 1.5;
+        margin: 10px 0;
+        opacity: 0.9;
+      }
+
+      #compatibility-overlay .icon {
+        font-size: clamp(2rem, 8vw, 4rem);
+        color: #60a5fa;
+        margin-bottom: 15px;
+      }
+
+      @media (max-width: 480px) {
+        .compatibility-content {
+          padding: 20px;
+        }
+      }
+      /* ...existing styles... */
     </style>
     <script type="importmap">
       {
@@ -232,6 +291,18 @@
     />
   </head>
   <body>
+    <!-- Add this at the very beginning of body -->
+    <div id="compatibility-overlay">
+      <div class="compatibility-content">
+        <div class="icon">
+          <i class="fas fa-desktop"></i>
+        </div>
+        <h2>Desktop Only Game</h2>
+        <p>This game requires keyboard and mouse controls.</p>
+        <p>Please switch to a desktop/laptop computer to play.</p>
+      </div>
+    </div>
+    <!-- ...existing code... -->
     <div id="game-container">
       <!-- Leaderboard -->
       <div id="leaderboard">

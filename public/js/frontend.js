@@ -1,6 +1,42 @@
 const canvas = document.querySelector('#gameCanvas')
 const c = canvas.getContext('2d')
 
+// More reliable mobile device detection
+function isMobileDevice() {
+  const toMatch = [
+    /Android/i,
+    /webOS/i,
+    /iPhone/i,
+    /iPad/i,
+    /iPod/i,
+    /BlackBerry/i,
+    /Windows Phone/i
+  ]
+  
+  return toMatch.some((toMatchItem) => {
+    return navigator.userAgent.match(toMatchItem)
+  })
+}
+
+// Simple device compatibility check
+function checkDeviceCompatibility() {
+  const compatibilityOverlay = document.getElementById('compatibility-overlay')
+  const gameContainer = document.getElementById('game-container')
+  
+  if (isMobileDevice()) {
+    compatibilityOverlay.style.display = 'flex'
+    gameContainer.style.visibility = 'hidden'
+    return false
+  } else {
+    compatibilityOverlay.style.display = 'none'
+    gameContainer.style.visibility = 'visible'
+    return true
+  }
+}
+
+// Initial check on page load
+document.addEventListener('DOMContentLoaded', checkDeviceCompatibility)
+
 const socket = io()
 
 const scoreEl = document.querySelector('#scoreEl')
