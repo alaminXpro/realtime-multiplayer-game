@@ -355,7 +355,7 @@ document.getElementById('shareButton').addEventListener('click', () => {
   const isHidden =
     socialShare.style.display === 'none' || !socialShare.style.display
   socialShare.style.display = isHidden ? 'block' : 'none'
-  document.getElementById('shareButton').innerText = isHidden ? 'Hide' : 'Share'
+  document.getElementById('shareButton').innerText = isHidden ? 'Hide' : 'Invite'
 })
 
 // Add this script to dynamically set share URLs
@@ -365,7 +365,4 @@ document.addEventListener('DOMContentLoaded', () => {
   socialLinks.forEach((link) => {
     link.href = link.href.replace('YOUR_URL', currentUrl)
   })
-  document
-    .querySelector('meta[property="og:url"]')
-    .setAttribute('content', window.location.href)
 })
